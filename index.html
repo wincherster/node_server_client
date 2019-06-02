@@ -1,0 +1,397 @@
+<html>
+
+<head>
+	<title>Node Express服务器</title>
+	<!-- 引入CSS初始化 -->
+	<style>
+		* {
+            padding: 0;
+            margin: 0;
+        }
+
+        html, body {
+            height: 100%;
+        }
+
+        #app {
+            min-width: 1000px;
+            height: 100%;
+            display: flex;
+            flex-flow: column;
+        }
+
+        .header {
+            height: 60px;
+            line-height: 60px;
+            display: flex;
+            color: #ffffff;
+            background: #3074f1;
+						padding: 0 20px;
+        }
+
+        .header .title {
+					flex: 1;
+            font-size: 18px;
+        }
+        .header .user-info {
+           display: flex;
+					 align-items: center;
+						/* width: 200px;	 */
+
+        }
+
+        .info-wrap {
+            display: inline-block;
+        }
+        .user-name {
+            
+        }
+        img {
+            width: 100%;
+            height: 100%;
+            /* display: block; */
+            vertical-align: middle;
+        }
+        .avatar {
+            height: 40px;
+            width: 40px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+        }
+        .continer{
+            display: flex;
+            flex: 1; 
+        }
+
+        /* 左侧菜单 */
+        .navagater {
+            min-width: 200px;
+            max-width: 200px;
+            border-right: solid 1px #e6e6e6;
+        }
+        .nav-munu{
+
+        }
+
+        /* 包括面包屑 和主体内容 */
+        .content {
+            display: flex;
+            flex: 1;
+            flex-flow: column;
+        }
+
+        /* 面包屑样式 */
+        .brand-tab {
+            height: 40px;
+            min-height: 40px;
+            border-bottom: 1px solid #cecece;
+        }
+
+        /* 主体内容 */
+        .main {
+            flex: 1;
+            padding: 20px;
+        }
+
+        /* 底部样式 */
+        .footer{
+            height: 50px;
+            line-height: 50px;
+            text-align: center;
+            min-height: 50px;
+            border-top: 1px solid #cecece;
+        }
+        #title-con{
+            text-align: center;
+        }
+        #table-wrap , #form-wrap{
+            padding: 30px;
+            border: 1px solid #cecece;
+        }
+        .button-wrap{
+            margin-bottom: 30px;
+        }
+
+    </style>
+	<!-- <link rel="stylesheet" href="./css/base.css"> -->
+	<!-- 引入样式 -->
+	<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+	<link rel="icon" href="//www.jd.com/favicon.ico" mce_href="//www.jd.com/favicon.ico" type="image/x-icon" />
+</head>
+
+<body>
+
+	<div id="app">
+		<div class="header">
+			<div class="title">图书管理系统</div>
+			<div class="user-info">
+				<div class="info-wrap">
+
+					<img src="https://www.qqtouxiang.com/d/file/tupian/mx/20180523/jipxnu3pum2pl.jpg" alt="" class="avatar" />
+					<span class="user-name">张小程</span>
+				</div>
+
+			</div>
+		</div>
+		<div class="continer">
+			<div class="navagater">
+				<div class="nav-munu">
+					<el-menu default-active="1-4-1" class="el-menu-vertical-demo">
+						<el-menu-item index="4">
+							<i class="el-icon-setting"></i>
+							<span slot="title">导航四</span>
+						</el-menu-item>
+					</el-menu>
+				</div>
+			</div>
+			<div class="content">
+				<div class="main">
+					<div class="main-header">
+						<el-button type="primary" size="mini" @click="handleAddBook">添加图书</el-button>
+					</div>
+					<el-table :data="tableData" style="width: 100%">
+						<el-table-column label="编号" width="180" prop="id">
+						</el-table-column>
+
+						<el-table-column label="名称" width="180" prop="name">
+						</el-table-column>
+
+						<el-table-column label="作者" width="180" prop="author">
+						</el-table-column>
+
+						<el-table-column label="分类" width="180" prop="category">
+						</el-table-column>
+
+						<el-table-column label="描述" prop="description">
+						</el-table-column>
+
+						<el-table-column label="操作" width="180">
+							<template slot-scope="scope">
+								<el-button size="mini" @click="handleEditBook(scope.$index, scope.row)">编辑</el-button>
+								<el-button size="mini" type="danger" @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+							</template>
+						</el-table-column>
+					</el-table>
+					<div class="pagination">
+						<el-pagination @size-change="handleSizeChange" @current-change="handleCurrentChange" :total="total"
+						 :page-sizes="[5, 10, 15, 20]" :page-size="5" layout="sizes, prev, pager, next, jumper">
+						</el-pagination>
+					</div>
+
+
+				</div>
+				<div class="footer">
+					©1999-2019 北京XXXXX网络技术有限公司
+				</div>
+			</div>
+
+			<el-dialog title="新增图书" :visible.sync="addFormShow">
+
+				<el-form ref="addFrom" :model="addFrom" label-width="80px">
+					<el-form-item label="图书名称">
+						<el-input v-model="addFrom.name" placeholder="请输入图书名称"></el-input>
+					</el-form-item>
+					<el-form-item label="作者">
+						<el-input v-model="addFrom.author" placeholder="请输入作者"></el-input>
+					</el-form-item>
+					<el-form-item label="分类">
+						<el-input v-model="addFrom.category" placeholder="请输入分类"></el-input>
+					</el-form-item>
+					<el-form-item label="描述">
+						<el-input v-model="addFrom.description" placeholder="请输入描述"></el-input>
+					</el-form-item>
+
+					<el-form-item>
+						<el-button type="primary" @click="addBook">立即添加</el-button>
+						<el-button @click="addFormShow = false">取消</el-button>
+					</el-form-item>
+				</el-form>
+
+			</el-dialog>
+
+			<el-dialog title="编辑图书" :visible.sync="editFromShow">
+				<el-form ref="editForm" :model="editForm" label-width="80px">
+					<el-form-item label="图书ID">
+						<el-input v-model="editForm.id" :disabled="true"></el-input>
+					</el-form-item>
+					<el-form-item label="图书名称">
+						<el-input v-model="editForm.name" placeholder="请输入图书名称"></el-input>
+					</el-form-item>
+					<el-form-item label="作者">
+						<el-input v-model="editForm.author" placeholder="请输入作者"></el-input>
+					</el-form-item>
+					<el-form-item label="分类">
+						<el-input v-model="editForm.category" placeholder="请输入分类"></el-input>
+					</el-form-item>
+					<el-form-item label="描述">
+						<el-input v-model="editForm.description" placeholder="请输入描述"></el-input>
+					</el-form-item>
+
+					<el-form-item>
+						<el-button type="primary" @click="editBook">保存</el-button>
+						<el-button @click="editFromShow = false">取消</el-button>
+					</el-form-item>
+
+				</el-form>
+
+				<!-- <div slot="footer" class="dialog-footer">
+					<el-button @click="editFromShow = false">取 消</el-button>
+					<el-button type="primary" @click="editBook()">确 定</el-button>
+				</div> -->
+
+			</el-dialog>
+
+		</div>
+	</div>
+
+	<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+	<!-- 引入组件库 -->
+	<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+	<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+	<script>
+		new Vue({
+			el: '#app',
+			data: {
+				addFormShow: false,
+				editFromShow: false,
+				addFrom: {
+					name: '',
+					author: '',
+					category: '',
+					description: ''
+				},
+				editForm: {
+					id: '',
+					name: '',
+					author: '',
+					category: '',
+					description: ''
+				},
+				pageSize: 5,
+				currentPage: 1,
+				total: '',
+				tableData: []
+			},
+			created() {
+				console.log('初始化了---！');
+				this.initList();
+			},
+			methods: {
+				handleSizeChange(val) {
+					this.pageSize = val;
+					this.initList();
+					console.log(`每页 ${val} 条`);
+				},
+				handleCurrentChange(val) {
+					this.currentPage = val;
+					this.initList();
+					console.log(`当前页: ${val}`);
+				},
+				handleAddBook() {
+					var _this = this;
+					_this.addFrom = {};
+					_this.addFormShow = true;
+				},
+				handleEditBook(index, row) {
+					var _this = this;
+					_this.editFromShow = true;
+					_this.editForm = {};
+					// 深拷贝操作一下
+					_this.editForm = JSON.parse(JSON.stringify(row));
+					console.log(index, row);
+				},
+				handleDelete(index, row) {
+					var _this = this;
+					var id = row.id;
+					this.$confirm('确认要删除这本书吗?', '', {
+						confirmButtonText: '确定',
+						cancelButtonText: '取消',
+						type: 'warning'
+					}).then(() => {
+						_this.deleteBook(index, id);
+					}).catch(() => {
+						this.$message({
+							type: 'info',
+							message: '已取消删除'
+						});
+					});
+				},
+				// 渲染列表数据
+				initList() {
+					var _this = this;
+					var data = {
+						size: _this.pageSize,
+						index: _this.currentPage
+					}
+					$.ajax({
+						type: 'post',
+						url: '/getBooks',
+						data: data,
+						dataType: 'json',
+						success: function (res) {
+							console.log(res);
+							_this.tableData = res.data;
+							_this.total = res.total;
+						}
+					});
+				},
+				// 添加图书信息 
+				addBook() {
+					var _this = this;
+					$.ajax({
+						type: 'post',
+						url: '/addBook',
+						data: _this.addFrom,
+						dataType: 'json',
+						success: function (res) {
+							if (res.code == '0000') {
+								// 关闭弹窗
+								_this.addFormShow = false;
+								// 添加成功 重新渲染列表
+								_this.initList();
+							}
+						}
+					})
+				},
+				// 编辑图书信息
+				editBook() {
+					var _this = this;
+					console.log(_this.editForm);
+					$.ajax({
+						type: 'post',
+						url: '/editBook',
+						data: _this.editForm,
+						dataType: 'json',
+						success: function (res) {
+							if (res.code == '0000') {
+								// 隐藏弹框
+								_this.editFromShow = false;
+								// 重新渲染数据列表
+								_this.initList();
+							}
+						}
+					})
+				},
+				// 删除图书信息
+				deleteBook(index, id) {
+					var _this = this;
+					$.ajax({
+						type: 'get',
+						url: '/delBook?id=' + id,
+						dataType: 'json',
+						success: function (res) {
+							// 删除成功后，重新渲染数据列表
+							console.log(res);
+							if (res.code == "0000") {
+								_this.tableData.splice(index, 1);
+							}
+						}
+					})
+				},
+
+			}
+		})
+	</script>
+</body>
+
+</html>

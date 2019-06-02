@@ -1,0 +1,31 @@
+{
+  "name": "helloworld",
+  "version": "1.0.0",
+  "description": "demo init",
+  "main": "index.js",
+  "scripts": {
+    "client-install": "npm install --prefix client",
+    "client": "npm start --prefix client",
+    "start": "node index.js",
+    "server": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "concurrently \"npm run server\" \"npm run client\""
+  },
+  "author": "zhangyuncheng",
+  "license": "ISC",
+  "dependencies": {
+    "art-template": "^4.13.2",
+    "concurrently": "^4.1.0",
+    "cors": "^2.8.5",
+    "express-art-template": "^1.0.1",
+    "express-ws": "^4.0.0",
+    "lodash": "^4.17.11",
+    "mysql": "github:mysqljs/mysql",
+    "silly-datetime": "^0.1.2"
+  },
+  "devDependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.4",
+    "nodemon": "^1.18.10"
+  }
+}
