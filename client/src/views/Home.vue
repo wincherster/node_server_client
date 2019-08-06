@@ -2,26 +2,31 @@
     <el-container class="home-container">
       <el-aside :width="!isCollapse ? '200px' : '60px'">
         
-        <el-menu default-active="1" class="el-menu-vertical-demo" @open="handleOpen" @close="handleClose" :collapse="isCollapse">
-          <el-menu-item index="1" @click="getIndex">
+        <el-menu 
+          default-active="1" 
+          class="el-menu-vertical-demo" 
+          @open="handleOpen" @close="handleClose" 
+          :collapse="isCollapse"
+          background-color="#001529"
+          text-color="#fff"
+          active-text-color="#1890ff">
+          <el-menu-item index="1" @click="toPage('/index')">
             <i class="el-icon-location"></i>
-            <span slot="title">首页</span>
+            <span slot="title">首页流程</span>
           </el-menu-item>
-          <el-menu-item index="2" @click="getDataBoard">
+          <el-menu-item index="2" @click="toPage('/data')">
             <i class="el-icon-menu"></i>
             <span slot="title">数据看板</span>
           </el-menu-item>
-          <el-menu-item index="3" @click="getDataTable"> 
+          <el-menu-item index="3" @click="toPage('/table')"> 
             <i class="el-icon-document"></i>
             <span slot="title">收支明细</span>
           </el-menu-item>
-          <el-menu-item index="4">
+          <el-menu-item index="4" @click="toPage('/other')">
             <i class="el-icon-setting"></i>
             <span slot="title">其他明细</span>
           </el-menu-item>
         </el-menu>
-      
-      
       
       </el-aside>
       <el-container>
@@ -48,9 +53,10 @@
 
         </el-header>
         <el-main>
-          
-
-          <router-view/>
+          <!-- 匹配的是组件的 name，组件要增加 name属性 -->
+          <keep-alive :include="['index']">
+            <router-view/>
+          </keep-alive>
         </el-main>
         <el-footer>
             互联网医院研发部 copyright@ 2019
@@ -62,100 +68,94 @@
 
 <script>
 
-export default {
-  name: 'home',
-  data(){
-    return {
-      data: [],
-      lastData: [],
-      isCollapse: false,
-      userInfo:{}
-    }
-  },
-  created(){
-    this.initList();
-  },
-  methods:{
-    toggleCollapse(){
-      if(this.isCollapse){
-        this.isCollapse = false;
-      }else {
-        this.isCollapse = true;
+  export default {
+    name: 'home',
+    data(){
+      return {
+        data: [],
+        lastData: [],
+        isCollapse: false,
+        userInfo:{},
+        
       }
     },
-    getIndex(){
-      this.$router.push({
-        path: '/index'
-      })
+    created(){
+      this.initList();
     },
-    initList() {
-      var _this = this;
-      var data = {
-        size: _this.pageSize,
-        index: _this.currentPage
-      }
-      _this.$axios({
-        method: 'post',
-        url: '/api/user',
-        data: data
-      })
-      .then((res)=> {
-        // console.log(res);
-        _this.userInfo = res.data.data[0];
-        // _this.total = res.total;
-      })
-  
-    },
-    
-    getDataBoard(){
-      this.$router.push({
-        path:'/data'
-      })
-    },
-    getDataTable(){
-      this.$router.push({
-        path:'/table'
-      })
-    },
-    DropClick(item) {
-      var _this = this;
-      if (item == "logout") {
+    methods:{
+      toggleCollapse(){
+        if(this.isCollapse){
+          this.isCollapse = false;
+        }else {
+          this.isCollapse = true;
+        }
+      },
+      toPage(path){
+        this.$router.push({
+          path: path
+        })
+      },
+      initList() {
+        var _this = this;
+        var data = {
+          size: _this.pageSize,
+          index: _this.currentPage
+        }
         _this.$axios({
           method: 'post',
-          url: '/api/logout'
+          url: '/api/user',
+          data: data
         })
         .then((res)=> {
-          if (res.data.code == "0000" && res.data.data) {
-            this.$message({
-              message: '退出成功~',
-              type: 'success'
-            });
-            setTimeout(function() {
-              _this.$router.push({
-                path: '/'
-              })
-            }, 1000)
-          } else {
-            this.$message({
-              message: res.data.msg,
-              type: 'error'
-            });
-          }
+          // console.log(res);
+          _this.userInfo = res.data.data[0];
+          // _this.total = res.total;
         })
     
-      } else if (item == "editPassword") {
-        // 修改密码
-      }
-    },
-    handleOpen(key, keyPath) {
-      console.log(key, keyPath);
-    },
-    handleClose(key, keyPath) {
-      console.log(key, keyPath);
+      },
+      
+      
+      DropClick(item) {
+        var _this = this;
+        if (item == "logout") {
+          _this.$axios({
+            method: 'post',
+            url: '/api/logout'
+          })
+          .then((res)=> {
+            if (res.data.code == "0000" && res.data.data) {
+              this.$message({
+                message: '退出成功~',
+                type: 'success'
+              });
+              setTimeout(function() {
+                _this.$router.push({
+                  path: '/'
+                })
+              }, 1000)
+            } else {
+              this.$message({
+                message: res.data.msg,
+                type: 'error'
+              });
+            }
+          })
+      
+        } else if (item == "editPassword") {
+          // 修改密码
+        }
+      },
+      handleOpen(key, keyPath) {
+        console.log(key, keyPath);
+      },
+      handleClose(key, keyPath) {
+        console.log(key, keyPath);
+      },
+
+      
+      
     }
-    
   }
-}
 </script>
 
 <style lang="scss" scoped>
@@ -163,8 +163,7 @@ section.el-container.home-container {
   height: 100%;
 }
  .el-header{
-    background: #0066FF;
-    color: #ffffff;
+    border-bottom: 1px solid #cecece;
     line-height: 60px;
     display: flex;
   }
@@ -176,7 +175,7 @@ section.el-container.home-container {
    }
   
   .el-aside {
-    // background-color: #cecece;
+    background-color: #001529;
     color: #333;
     line-height: 200px;
     border-right: 1px solid #cecece;
@@ -184,6 +183,7 @@ section.el-container.home-container {
   
   .el-main {
     color: #333;
+    background: #f8f8f8;
   }
   
   body > .el-container {
@@ -203,7 +203,7 @@ section.el-container.home-container {
       // width: 500px;
       // border: 1px solid red;
       display: flex;
-      color: #ffffff;
+      // color: #ffffff;
       align-items: center;
       min-width: 103px;
       text-align: right;
@@ -221,13 +221,13 @@ section.el-container.home-container {
         display: inline-block;
         border-radius: 50%;
         margin-right: 12px;
-        border: 1px solid #ffffff;
+        border: 1px solid #001529;
         overflow: hidden;
       }
 
       .el-dropdown-link {
         cursor: default;
-        color: #ffffff;
+        // color: #ffffff;
         display: flex;
         align-items: center;
       }

@@ -22,6 +22,11 @@ export default new Router({
       component: () => import(/* webpackChunkName: "about" */ './views/Home.vue'),
       children:[
         {
+          path: '/',
+          name: 'data',
+          component: () => import(/* webpackChunkName: "about" */ './views/Index.vue'),
+        },
+        {
           path: '/data',
           name: 'data',
           component: () => import(/* webpackChunkName: "about" */ './views/DataBoard.vue'),
@@ -30,6 +35,11 @@ export default new Router({
           path: '/table',
           name: 'data',
           component: () => import(/* webpackChunkName: "about" */ './views/Table.vue'),
+        },
+        {
+          path: '/other',
+          name: 'data',
+          component: () => import(/* webpackChunkName: "about" */ './views/Other.vue'),
         }
       ]
     }
